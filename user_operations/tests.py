@@ -1,5 +1,66 @@
 from django.contrib.auth.models import User
+
 from rest_framework.test import APITestCase
+
+
+class SignupAPIViewTests(APITestCase):
+    URL = "/user/api/v1/signup/"
+
+    def test_signup_success(self):
+        """
+        Test successful user signup.
+        """
+        data = {"email": "test@example.com", "password": "password123"}
+        response = self.client.post(self.URL, data, format="json")
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.get().email, "test@example.com")
+
+    def test_signup_missing_email(self):
+        """
+        Test signup with missing email.
+        """
+        data = {"password": "password123"}
+        response = self.client.post(self.URL, data, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["response"]["message"], "Please enter email!")
+
+    def test_signup_missing_password(self):
+        """
+        Test signup with missing password.
+        """
+        data = {"email": "test@example.com"}
+        response = self.client.post(self.URL, data, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["response"]["message"], "Please enter password!")
+
+    def test_signup_invalid_email(self):
+        """
+        Test signup with invalid email.
+        """
+        data = {"email": "invalid_email", "password": "password123"}
+        response = self.client.post(self.URL, data, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data["response"]["message"], "Please enter valid email!"
+        )
+
+    def test_signup_existing_email(self):
+        """
+        Test signup with existing email.
+        """
+        User.objects.create_user(
+            username="existing@example.com",
+            email="existing@example.com",
+            password="password123",
+        )
+        data = {"email": "existing@example.com", "password": "password123"}
+        response = self.client.post(self.URL, data, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data["response"]["message"],
+            "Email already registered with another user!",
+        )
 
 
 class LoginAPITestCase(APITestCase):
@@ -19,7 +80,7 @@ class LoginAPITestCase(APITestCase):
         """
         Test the login API with valid credentials.
         """
-        data = {"username": "test@example.com", "password": "password123"}
+        data = {"email": "test@example.com", "password": "password123"}
         response = self.client.post(self.URL, data, format="json")
         self.assertEqual(response.status_code, 200)
 
@@ -27,7 +88,7 @@ class LoginAPITestCase(APITestCase):
         """
         Test the login API with invalid credentials.
         """
-        data = {"username": "test@example.com", "password": "wrongpassword"}
+        data = {"email": "test@example.com", "password": "wrongpassword"}
         response = self.client.post(self.URL, data, format="json")
         self.assertEqual(response.status_code, 401)
 
@@ -43,7 +104,7 @@ class LoginAPITestCase(APITestCase):
         """
         Test the login API when password is missing.
         """
-        data = {"username": "test@example.com"}
+        data = {"email": "test@example.com"}
         response = self.client.post(self.URL, data, format="json")
         self.assertEqual(response.status_code, 400)
 
@@ -51,7 +112,7 @@ class LoginAPITestCase(APITestCase):
         """
         Test the login API with invalid email format.
         """
-        data = {"username": "invalidemail", "password": "password123"}
+        data = {"email": "invalidemail", "password": "password123"}
         response = self.client.post(self.URL, data, format="json")
         self.assertEqual(response.status_code, 400)
 
@@ -59,7 +120,7 @@ class LoginAPITestCase(APITestCase):
         """
         Test the login API with valid credentials in uppercase.
         """
-        data = {"username": "TEST@EXAMPLE.COM", "password": "password123"}
+        data = {"email": "TEST@EXAMPLE.COM", "password": "password123"}
         response = self.client.post(self.URL, data, format="json")
         self.assertEqual(response.status_code, 200)
 
@@ -67,6 +128,6 @@ class LoginAPITestCase(APITestCase):
         """
         Test the login API with valid credentials in mixed case.
         """
-        data = {"username": "TEST@example.COM", "password": "password123"}
+        data = {"email": "TEST@example.COM", "password": "password123"}
         response = self.client.post(self.URL, data, format="json")
         self.assertEqual(response.status_code, 200)
