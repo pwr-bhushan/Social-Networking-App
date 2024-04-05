@@ -11,6 +11,6 @@ class UserSerializer(serializers.ModelSerializer):
     # Override to_representation for the 'id' field
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["id"] = int(representation["id"]) + 100000
+        representation["id"] = int(representation["id"])
         representation["name"] = representation.pop("first_name")
         return representation

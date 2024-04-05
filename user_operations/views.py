@@ -12,7 +12,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
-from .utils import get_api_response
+from utitlities.utils import get_api_response
+
 from .serializers import UserSerializer
 
 
@@ -37,6 +38,13 @@ class SignupAPIView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
 
+        if not name:
+            return get_api_response(
+                False,
+                {"message": "Please enter name!"},
+                status.HTTP_400_BAD_REQUEST,
+            )
+
         if not email:
             return get_api_response(
                 False,
@@ -58,16 +66,16 @@ class SignupAPIView(APIView):
                 status.HTTP_400_BAD_REQUEST,
             )
 
-        # Check if email already exists
-        if User.objects.filter(email=email).exists():
+        # Convert email to lowercase to match case-insensitive comparison
+        email = email.lower()
+
+        # Check if email is already registered with another user
+        if User.objects.filter(email__iexact=email).exists():
             return get_api_response(
                 False,
                 {"message": "Email already registered with another user!"},
                 status.HTTP_400_BAD_REQUEST,
             )
-
-        # Convert email to lowercase to match case-insensitive comparison
-        email = email.lower()
 
         # Create new user
         user_obj = User.objects.create_user(
@@ -152,6 +160,7 @@ class LogoutAPIView(APIView):
         )
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class SearchUserAPIView(APIView):
     permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
@@ -176,13 +185,20 @@ class SearchUserAPIView(APIView):
 
         # Filter the queryset based on the search query
         # Excluding the current user as we should only see other users in search
-        users_queryset = (
-            User.objects.filter(
-                Q(email__icontains=search_query) | Q(first_name__icontains=search_query)
-            )
-            .exclude(id=self.request.user.id)
-            .order_by("email")
+        # Checking if we find the exact match first, if not we check for partial matches
+        users_queryset = User.objects.filter(Q(email__iexact=search_query)).exclude(
+            id=self.request.user.id  # type: ignore
         )
+
+        if not users_queryset.exists():
+            users_queryset = (
+                User.objects.filter(
+                    Q(email__icontains=search_query)
+                    | Q(first_name__icontains=search_query)
+                )
+                .exclude(id=self.request.user.id)  # type: ignore
+                .order_by("email")
+            )
 
         paginator = self.pagination_class()
         paginated_queryset = paginator.paginate_queryset(users_queryset, request)

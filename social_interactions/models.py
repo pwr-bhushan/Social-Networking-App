@@ -44,6 +44,9 @@ class FriendRequest(models.Model):
         verbose_name_plural = "Friend Requests"
         unique_together = ("from_user", "to_user")
 
+    def __str__(self):
+        return f"Friend Request: {self.from_user} -> {self.to_user}"
+
 
 class Friend(models.Model):
     friend1 = models.ForeignKey(
@@ -63,3 +66,6 @@ class Friend(models.Model):
         verbose_name = "Friends"
         verbose_name_plural = "Friends"
         unique_together = ("friend1", "friend2")
+
+    def __str__(self):
+        return f"Friends: {self.friend1} -> {self.friend2}"
