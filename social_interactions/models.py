@@ -45,7 +45,9 @@ class FriendRequest(models.Model):
         unique_together = ("from_user", "to_user")
 
     def __str__(self):
-        return f"Friend Request: {self.from_user} -> {self.to_user}"
+        return (
+            f"Friend Request: {self.from_user.first_name} -> {self.to_user.first_name}"
+        )
 
 
 class Friend(models.Model):
@@ -68,4 +70,4 @@ class Friend(models.Model):
         unique_together = ("friend1", "friend2")
 
     def __str__(self):
-        return f"Friends: {self.friend1} -> {self.friend2}"
+        return f"Friends: {self.friend1.first_name} -> {self.friend2.first_name}"

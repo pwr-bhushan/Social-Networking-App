@@ -6,6 +6,10 @@ from .models import FriendRequest
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
+    """
+    Serializer for FriendRequest model.
+    """
+
     from_user = UserSerializer()
     to_user = UserSerializer()
 

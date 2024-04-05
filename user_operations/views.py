@@ -19,6 +19,9 @@ from .serializers import UserSerializer
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SignupAPIView(APIView):
+    """
+    A view for user signup.
+    """
 
     def is_valid_email(self, email):
         """
@@ -89,6 +92,9 @@ class SignupAPIView(APIView):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class LoginAPIView(APIView):
+    """
+    A view for user authentication.
+    """
 
     def is_valid_email(self, email):
         """
@@ -151,6 +157,10 @@ class LoginAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
+    """
+    A view for user logout.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -160,8 +170,11 @@ class LogoutAPIView(APIView):
         )
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class SearchUserAPIView(APIView):
+    """
+    A view for searching users.
+    """
+
     permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
     pagination_class.page_size = 10

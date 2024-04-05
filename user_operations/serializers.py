@@ -8,9 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "email", "first_name"]
 
-    # Override to_representation for the 'id' field
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["id"] = int(representation["id"])
         representation["name"] = representation.pop("first_name")
         return representation

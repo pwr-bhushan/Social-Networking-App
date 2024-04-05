@@ -16,6 +16,9 @@ class FriendRequestAPITest(APITestCase):
     URL = reverse("friend-request-api")
 
     def setUp(self):
+        """
+        Set up the test environment by creating two users with the given username, email, and password.
+        """
         self.user1 = User.objects.create_user(
             username="user1", email="user1@example.com", password="password"
         )
@@ -24,6 +27,9 @@ class FriendRequestAPITest(APITestCase):
         )
 
     def test_send_friend_request(self):
+        """
+        Test sending a friend request from user1 to user2.
+        """
         # Set up
         self.client.force_authenticate(user=self.user1)  # type: ignore
         data = {"action": "send", "friend_id": self.user2.id}  # type: ignore
@@ -34,6 +40,9 @@ class FriendRequestAPITest(APITestCase):
         self.assertEqual(response.data["response"]["message"], "Friend request sent successfully!")  # type: ignore
 
     def test_accept_friend_request(self):
+        """
+        Test accepting a friend request from user2 to user1.
+        """
         # Set up
         friend_request = FriendRequest.objects.create(
             from_user=self.user1, to_user=self.user2
@@ -49,6 +58,9 @@ class FriendRequestAPITest(APITestCase):
         )
 
     def test_reject_friend_request(self):
+        """
+        Test rejecting a friend request from user2 to user1.
+        """
         # Set up
         friend_request = FriendRequest.objects.create(
             from_user=self.user1, to_user=self.user2
@@ -64,6 +76,9 @@ class FriendRequestAPITest(APITestCase):
         )
 
     def test_send_friend_request_throttling(self):
+        """
+        Test that a user can only send a friend request once every minute.
+        """
         self.friend1 = User.objects.create_user(
             username="friend1", email="friend1@example.com", password="testpassword"
         )
@@ -96,6 +111,9 @@ class FriendListAPITest(APITestCase):
     URL = reverse("friend-list-api")
 
     def setUp(self):
+        """
+        Set up the test environment by creating two users with the given username, email, and password.
+        """
         self.user1 = User.objects.create_user(
             username="user1", email="user1@example.com", password="password"
         )
@@ -105,6 +123,9 @@ class FriendListAPITest(APITestCase):
         self.friend1 = Friend.objects.create(friend1=self.user1, friend2=self.user2)
 
     def test_get_friend_list(self):
+        """
+        Test getting the friend list of a user.
+        """
         # Set up
         self.client.force_authenticate(user=self.user1)  # type: ignore
 
@@ -115,6 +136,9 @@ class FriendListAPITest(APITestCase):
         self.assertEqual(response.data["results"][0]["id"], self.user2.id)  # type: ignore
 
     def test_pagination(self):
+        """
+        Test pagination of the friend list.
+        """
         # Set up
         count = 15
         self.new_test_user = User.objects.create_user(
@@ -142,6 +166,9 @@ class FriendListAPITest(APITestCase):
         self.assertEqual(response.data["count"], count)  # type: ignore
 
     def test_authenticated_user_access(self):
+        """
+        Test authenticated access to the friend list.
+        """
         # Test unauthenticated access
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 403)
@@ -156,6 +183,9 @@ class PendingFriendListAPITest(APITestCase):
     URL = reverse("pending-friend-requests")
 
     def setUp(self):
+        """
+        Set up the test environment by creating two users with the given username, email, and password.
+        """
         self.user1 = User.objects.create_user(
             username="user1", email="user1@example.com", password="password"
         )
@@ -173,6 +203,9 @@ class PendingFriendListAPITest(APITestCase):
         )
 
     def test_get_pending_friend_list(self):
+        """
+        Test getting the pending friend list of a user.
+        """
         # Set up
         self.client.force_authenticate(user=self.user1)  # type: ignore
 
@@ -182,6 +215,9 @@ class PendingFriendListAPITest(APITestCase):
         self.assertEqual(response.data["count"], 2)  # type: ignore
 
     def test_pagination(self):
+        """
+        Test pagination of the pending friend list.
+        """
         # Set up
         count = 10
         self.test_user = User.objects.create_user(
@@ -209,6 +245,9 @@ class PendingFriendListAPITest(APITestCase):
         self.assertEqual(response.data["count"], count)  # type: ignore
 
     def test_authenticated_user_access(self):
+        """
+        Test authenticated access to the pending friend list.
+        """
         # Test unauthenticated access
         response = self.client.get(self.URL)
         self.assertEqual(response.status_code, 403)

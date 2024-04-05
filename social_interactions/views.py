@@ -8,7 +8,6 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
-
 from utitlities.utils import get_api_response
 from user_operations.serializers import UserSerializer
 
